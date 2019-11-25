@@ -6,16 +6,12 @@
 #include "observer.h"
 #include <thread>
 #include <mutex>
-
 static std::string file_name;
-class logger : public IObserver
+class Logger : public IObserver
 {
-    vector<string> cmd_local_buf;
 public:
     static int iter;
     static vector<string> cmd_str;
-    static bool first_thread;
-    logger();
     std::string currentDateTime(std::string format);
     std::string path;
     void init(std::string path_log);
@@ -35,7 +31,6 @@ public:
         ss << seconds;
 
         file_name="bulk"+ss.str()+".log";
-        first_thread=true;
         std::ofstream ifs(file_name.c_str(), std::ios_base::in | std::ios_base::app);
     }
 };

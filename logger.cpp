@@ -1,17 +1,13 @@
 #include "logger.h"
 #include <unistd.h>
-
-logger::logger()
-{
-}
-
-void logger::init(std::string path_log){
+//#include "async.h"
+void Logger::init(std::string path_log){
     path="/";
     file_name=currentDateTime("%d.%m.%Y")+".log";
     std::ofstream ifs(file_name.c_str(), std::ios_base::in | std::ios_base::app);
 }
 
-std::string logger::currentDateTime(std::string format) {
+std::string Logger::currentDateTime(std::string format) {
     time_t     now = time(0);
     struct tm  tstruct;
     char       buf[80];
@@ -19,7 +15,7 @@ std::string logger::currentDateTime(std::string format) {
     strftime(buf, sizeof(buf), format.c_str(), &tstruct);
     return buf;
 }
-void logger::info(std::string s){
+void Logger::info(std::string s){
 //    msg(s,"INFO");
 }
 
@@ -39,7 +35,7 @@ void iter_t(std::ofstream &ifs,vector<string> &cmd_local){
     return;
 }
 
-void logger::run_threads(vector<string> cmd_local){
+void Logger::run_threads(vector<string> cmd_local){
     std::ofstream ifs(file_name.c_str(), std::ios_base::in | std::ios_base::app);
     a=0;
     if (ifs.is_open())
@@ -66,7 +62,7 @@ std::string get_line(std::vector<string> &cmd_local){
     return sum_cmd;
 }
 
-void logger::cmd_line_log_thread(vector<string> &cmd_local){
+void Logger::cmd_line_log_thread(vector<string> &cmd_local){
     std::string sum_cmd="bulk: ";
     for (auto str = cmd_local.begin(); str != cmd_local.end(); ++str) {
         sum_cmd=sum_cmd+*str;
@@ -77,19 +73,15 @@ void logger::cmd_line_log_thread(vector<string> &cmd_local){
 
 }
 
-void logger::file_log_thread_one(vector<string> &cmd_local){
+void Logger::file_log_thread_one(vector<string> &cmd_local){
         msg(get_line(cmd_local));
 }
 
-void logger::file_log_thread_two(vector<string> &cmd_local){
+void Logger::file_log_thread_two(vector<string> &cmd_local){
         msg(get_line(cmd_local));
 }
 
-
-bool logger::first_thread;
-std::vector<std::string> logger::cmd_str;
-
-void logger::msg(std::string s){
+void Logger::msg(std::string s){
     std::ofstream ifs(file_name.c_str(), std::ios_base::in | std::ios_base::app);
      if (ifs.is_open())
      {
