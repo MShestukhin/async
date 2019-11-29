@@ -55,7 +55,7 @@ class Reflector: public IObserver // Prints the observed string into cout
     buf *buf_ptr;
 public:
 
-    Reflector(buf *bb){
+    void set(buf *bb){
         buf_ptr=bb;
     }
 
@@ -72,7 +72,7 @@ class Counter: public IObserver // Prints the length of observed string into cou
     buf *buf_ptr;
 public:
 
-    Counter(buf *bb){
+    void set(buf *bb){
         buf_ptr=bb;
     }
   virtual void handleEvent(const SupervisedString& ref)
@@ -85,21 +85,21 @@ class ObjCounter: public IObserver // Prints the length of observed string into 
 {
     buf *buf_ptr;
 public:
-    ObjCounter(buf *bb){
+    static int local_iter;
+    void set(buf *bb){
         buf_ptr=bb;
     }
 //  static int local_iter;
   virtual void handleEvent(const SupervisedString& ref)
   {
         if(ref.get()=="{"){
-            buf_ptr->local_iter=buf_ptr->local_iter+1;
-            buf_ptr->iter=buf_ptr->local_iter;
+            local_iter=local_iter+1;
+            buf_ptr->iter=local_iter;
         }
         if(ref.get()=="}"){
-            buf_ptr->local_iter=buf_ptr->local_iter-1;
-            buf_ptr->iter=buf_ptr->local_iter;
+            local_iter=local_iter-1;
+            buf_ptr->iter=local_iter;
         }
-
   }
 };
 
@@ -107,20 +107,19 @@ class IterLookup: public IObserver // Prints the length of observed string into 
 {
     buf *buf_ptr;
 public:
-    IterLookup(buf *bb){
+    void set(buf *bb){
         buf_ptr=bb;
     }
   virtual void handleEvent(const SupervisedString& ref)
   {
         if(buf_ptr->iter == 0){
-            vector<string> bb;
             Logger::run_threads(buf_ptr->cmd_str);
             buf_ptr->cmd_str.clear();
         }
   }
 };
 SupervisedString connect(std::size_t bulk);
-void receive(SupervisedString handle, const char *data, std::size_t size);
+void receive(SupervisedString &handle, const char *data, std::size_t size);
 void disconnect(SupervisedString handle);
 
 }

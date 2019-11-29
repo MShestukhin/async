@@ -71,7 +71,6 @@ void Logger::cmd_line_log_thread(vector<string> &cmd_local){
             sum_cmd+=", ";
     }
     std::cout<<sum_cmd<<"\n";
-
 }
 
 void Logger::file_log_thread_one(vector<string> &cmd_local){
@@ -94,17 +93,22 @@ void Logger::msg(std::string s){
 }
 
 
-buf *b=new buf(5);
-Counter cnt(b);
-Reflector refl(b);
-IterLookup iterLookup(b);
-ObjCounter objCnt(b);
+buf *b;
+Counter cnt;
+Reflector refl;
+IterLookup iterLookup;
+ObjCounter objCnt;
 Logger log;
 int sum_cmd=0;
+int ObjCounter::local_iter=0;
 SupervisedString connect(std::size_t bulk) {
     sum_cmd=bulk;
-//    b=new buf(bulk);
+    b=new buf(bulk);
     SupervisedString str;
+    cnt.set(b);
+    refl.set(b);
+    iterLookup.set(b);
+    objCnt.set(b);
     str.add(iterLookup);
     str.add(refl);
     str.add(cnt);
@@ -113,15 +117,15 @@ SupervisedString connect(std::size_t bulk) {
     return str;
 }
 
-void receive(SupervisedString handle, const char *data, std::size_t size) {
-    string cmd;
+void receive(SupervisedString &handle, const char *data, std::size_t size) {
+    static string cmd;
     while (*data){
         if(*data!='\n')
             cmd.push_back(*data);
         else {
             if(cmd == "}" || cmd =="{"){
                 handle.remove(cnt);
-                if(!b->local_iter)
+                if(!ObjCounter::local_iter)
                     b->cmd_str.clear();
             }
             handle.reset(cmd);
