@@ -41,15 +41,6 @@ public:
 
 //using handle_t = void *;
 
-struct buf {
-    vector<string> cmd_str;
-    int iter=0;
-    int local_iter=0;
-    buf(size_t n){
-        iter=n;
-    }
-};
-
 class Reflector: public IObserver // Prints the observed string into cout
 {
     buf *buf_ptr;
@@ -118,8 +109,37 @@ public:
         }
   }
 };
-SupervisedString connect(std::size_t bulk);
-void receive(SupervisedString &handle, const char *data, std::size_t size);
+
+struct singleton {
+    Counter cnt;
+    Reflector refl;
+    IterLookup iterLookup;
+    ObjCounter objCnt;
+    Logger log;
+    SupervisedString str;
+    buf *b;
+    singleton(std::size_t bulk) {
+        b=new buf(bulk);
+        cnt.set(b);
+        refl.set(b);
+        iterLookup.set(b);
+        objCnt.set(b);
+        str.add(iterLookup);
+        str.add(refl);
+        str.add(cnt);
+        str.add(objCnt);
+        str.add(log);
+    }
+    void remove_cnt(){
+        str.remove(cnt);
+    }
+    void add_cnt(){
+        str.add(cnt);
+    }
+};
+
+singleton connect(std::size_t bulk);
+void receive(singleton &handle, const char *data, std::size_t size);
 void disconnect(SupervisedString handle);
 
 }

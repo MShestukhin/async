@@ -5,6 +5,16 @@
 #include <vector>
 using namespace std;
 class SupervisedString;
+
+struct buf {
+    vector<string> cmd_str;
+    int iter=0;
+    int local_iter=0;
+    buf(size_t n){
+        iter=n;
+    }
+};
+
 class IObserver
 {
 public:

@@ -1,5 +1,7 @@
 #include "async.h"
 #include <string>
+#include <map>
+
 namespace async {
 
 void Logger::init(std::string path_log){
@@ -16,6 +18,7 @@ std::string Logger::currentDateTime(std::string format) {
     strftime(buf, sizeof(buf), format.c_str(), &tstruct);
     return buf;
 }
+
 void Logger::info(std::string s){
 //    msg(s,"INFO");
 }
@@ -30,7 +33,6 @@ void iter_t(std::ofstream &ifs,vector<string> &cmd_local){
             ifs<<", ";
         a++;
         lk.unlock();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
         return iter_t(ifs,cmd_local);
     }
     return;
@@ -92,48 +94,50 @@ void Logger::msg(std::string s){
          std::cout << "Error opening file\n";
 }
 
-
-buf *b;
 Counter cnt;
 Reflector refl;
 IterLookup iterLookup;
 ObjCounter objCnt;
 Logger log;
 int sum_cmd=0;
+buf *b;
 int ObjCounter::local_iter=0;
-SupervisedString connect(std::size_t bulk) {
+std::map<SupervisedString*, buf*> mapa;
+singleton connect(std::size_t bulk) {
     sum_cmd=bulk;
-    b=new buf(bulk);
-    SupervisedString str;
-    cnt.set(b);
-    refl.set(b);
-    iterLookup.set(b);
-    objCnt.set(b);
-    str.add(iterLookup);
-    str.add(refl);
-    str.add(cnt);
-    str.add(objCnt);
-    str.add(log);
-    return str;
+    singleton sin(bulk);
+//    b=new buf(bulk);
+//    SupervisedString str;
+//    cnt.set(b);
+//    refl.set(b);
+//    iterLookup.set(b);
+//    objCnt.set(b);
+//    str.add(iterLookup);
+//    str.add(refl);
+//    str.add(cnt);
+//    str.add(objCnt);
+//    str.add(log);
+//    mapa.insert(std::pair<SupervisedString*,buf*>((SupervisedString*)&str,b));
+    return sin;
 }
-
-void receive(SupervisedString &handle, const char *data, std::size_t size) {
+void receive(singleton &handle, const char *data, std::size_t size) {
     static string cmd;
+//    buf *b=mapa.find((SupervisedString*)&handle)->second;
     while (*data){
         if(*data!='\n')
             cmd.push_back(*data);
         else {
             if(cmd == "}" || cmd =="{"){
-                handle.remove(cnt);
+                handle.remove_cnt();
                 if(!ObjCounter::local_iter)
-                    b->cmd_str.clear();
+                    handle.b->cmd_str.clear();
             }
-            handle.reset(cmd);
-            handle.remove(log);
-            if(b->iter == 0){
-                b->iter=sum_cmd;
-                handle.remove(cnt);
-                handle.add(cnt);
+            handle.str.reset(cmd);
+            handle.str.remove(log);
+            if(handle.b->iter == 0){
+                handle.b->iter=sum_cmd;
+                handle.remove_cnt();
+                handle.add_cnt();
             }
             cmd.clear();
         }
