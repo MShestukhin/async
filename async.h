@@ -118,6 +118,7 @@ struct singleton {
     Logger log;
     SupervisedString str;
     buf *b;
+    string cmd;
     singleton(std::size_t bulk) {
         b=new buf(bulk);
         cnt.set(b);
@@ -135,6 +136,30 @@ struct singleton {
     }
     void add_cnt(){
         str.add(cnt);
+    }
+
+    void data_worker(const char *data, int sum_cmd){
+    //    buf *b=mapa.find((SupervisedString*)&handle)->second;
+        while (*data){
+            if(*data!='\n')
+                cmd.push_back(*data);
+            else {
+                if(cmd == "}" || cmd =="{"){
+                    str.remove(cnt);
+                    if(!ObjCounter::local_iter)
+                        b->cmd_str.clear();
+                }
+                str.reset(cmd);
+                str.remove(log);
+                if(b->iter == 0){
+                    b->iter=sum_cmd;
+                    str.remove(cnt);
+                    str.add(cnt);
+                }
+                cmd.clear();
+            }
+              data++;
+        }
     }
 };
 

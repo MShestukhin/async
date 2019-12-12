@@ -94,55 +94,15 @@ void Logger::msg(std::string s){
          std::cout << "Error opening file\n";
 }
 
-Counter cnt;
-Reflector refl;
-IterLookup iterLookup;
-ObjCounter objCnt;
-Logger log;
 int sum_cmd=0;
-buf *b;
 int ObjCounter::local_iter=0;
-std::map<SupervisedString*, buf*> mapa;
 singleton connect(std::size_t bulk) {
     sum_cmd=bulk;
     singleton sin(bulk);
-//    b=new buf(bulk);
-//    SupervisedString str;
-//    cnt.set(b);
-//    refl.set(b);
-//    iterLookup.set(b);
-//    objCnt.set(b);
-//    str.add(iterLookup);
-//    str.add(refl);
-//    str.add(cnt);
-//    str.add(objCnt);
-//    str.add(log);
-//    mapa.insert(std::pair<SupervisedString*,buf*>((SupervisedString*)&str,b));
     return sin;
 }
 void receive(singleton &handle, const char *data, std::size_t size) {
-    static string cmd;
-//    buf *b=mapa.find((SupervisedString*)&handle)->second;
-    while (*data){
-        if(*data!='\n')
-            cmd.push_back(*data);
-        else {
-            if(cmd == "}" || cmd =="{"){
-                handle.remove_cnt();
-                if(!ObjCounter::local_iter)
-                    handle.b->cmd_str.clear();
-            }
-            handle.str.reset(cmd);
-            handle.str.remove(log);
-            if(handle.b->iter == 0){
-                handle.b->iter=sum_cmd;
-                handle.remove_cnt();
-                handle.add_cnt();
-            }
-            cmd.clear();
-        }
-          data++;
-    }
+    handle.data_worker(data,sum_cmd);
 }
 
 void disconnect(SupervisedString handle) {
