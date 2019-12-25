@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.9)
-project(async)
+
+if($ENV{TRAVIS_BUILD_NUMBER})
+    project(async VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
+else ()
+    project(async VERSION 0.0.1)
+endif()
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -18,3 +23,25 @@ add_library(logger SHARED logger.cpp logger.h)
 add_executable(async_cli main.cpp)
 
 target_link_libraries(async_cli async)
+
+set_target_properties(async PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+)
+
+target_include_directories(async
+    PRIVATE "${CMAKE_BINARY_DIR}"
+)
+
+install(TARGETS bulk RUNTIME DESTINATION bin)
+
+set(CPACK_GENERATOR DEB)
+
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+
+set(CPACK_PACKAGE_CONTACT example@example.com)
+
+include(CPack)
+
