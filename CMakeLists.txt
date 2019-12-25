@@ -33,7 +33,7 @@ target_include_directories(async
     PRIVATE "${CMAKE_BINARY_DIR}"
 )
 
-install(TARGETS bulk RUNTIME DESTINATION bin)
+install(TARGETS async_cli RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 
